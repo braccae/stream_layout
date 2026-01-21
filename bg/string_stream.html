@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Animated String Background</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: "Courier New", monospace;
+                background: linear-gradient(
+                    135deg,
+                    #1e2030 0%,
+                    #181926 50%,
+                    #24273a 100%
+                );
+                overflow: hidden;
+                height: 100vh;
+                position: relative;
+            }
+
+            .string-container {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+            }
+
+            .string-snippet {
+                position: absolute;
+                font-size: 14px;
+                font-weight: 500;
+                white-space: nowrap;
+                opacity: 0.8;
+                filter: blur(0.5px);
+                text-shadow: 0 0 10px currentColor;
+            }
+
+            .string-snippet.large {
+                font-size: 18px;
+                opacity: 0.9;
+                filter: blur(0px);
+            }
+
+            .string-snippet.small {
+                font-size: 12px;
+                opacity: 0.6;
+                filter: blur(1px);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="string-container" id="stringContainer"></div>
+
+        <script>
+            // Catppuccin Macchiato color palette
+            const catppuccinColors = [
+                "#c6a0f6", // Lavender
+                "#8aadf4", // Blue
+                "#a6da95", // Green
+                "#f5bde6", // Pink
+                "#f0c6c6", // Red
+                "#eed49f", // Yellow
+                "#91d7e3", // Sky
+                "#7dc4e4", // Sapphire
+                "#f5a97f", // Peach
+                "#ed8796", // Maroon
+                "#8bd5ca", // Teal
+                "#6e738d", // Subtext0
+            ];
+
+            // Load strings from text file
+            let strings = [];
+
+            // Function to load strings from text file
+            async function loadStrings() {
+                try {
+                    const response = await fetch("strings.txt");
+                    if (!response.ok) {
+                        throw new Error("Failed to load strings.txt");
+                    }
+                    const text = await response.text();
+                    strings = text
+                        .split("\n")
+                        .filter((line) => line.trim() !== "");
+                    console.log(
+                        `Loaded ${strings.length} strings from strings.txt`,
+                    );
+                } catch (error) {
+                    console.error("Error loading strings:", error);
+                    // Fallback to default strings if loading fails
+                    strings = [
+                        "Hello World",
+                        "Streaming Data",
+                        "Digital Rain",
+                        "Information Flow",
+                        "Data Stream",
+                    ];
+                }
+            }
+
+            const container = document.getElementById("stringContainer");
+            const activeSnippets = [];
+
+            function createStringSnippet() {
+                // If strings haven't loaded yet, wait a bit and try again
+                if (strings.length === 0) {
+                    setTimeout(createStringSnippet, 100);
+                    return;
+                }
+
+                const snippet = document.createElement("div");
+                snippet.className = "string-snippet";
+
+                // Random size variation
+                const sizeRandom = Math.random();
+                if (sizeRandom < 0.2) {
+                    snippet.classList.add("large");
+                } else if (sizeRandom < 0.4) {
+                    snippet.classList.add("small");
+                }
+
+                // Random string
+                const randomString =
+                    strings[Math.floor(Math.random() * strings.length)];
+                snippet.textContent = randomString;
+
+                // Random color from Catppuccin palette
+                const randomColor =
+                    catppuccinColors[
+                        Math.floor(Math.random() * catppuccinColors.length)
+                    ];
+                snippet.style.color = randomColor;
+
+                // Random vertical position
+                const yPos = Math.random() * (window.innerHeight - 50);
+                snippet.style.top = yPos + "px";
+
+                // Start from right side of screen
+                snippet.style.left = window.innerWidth + "px";
+
+                container.appendChild(snippet);
+                activeSnippets.push(snippet);
+
+                // Animate snippet moving left
+                const duration = 25 + Math.random() * 2; // 25-45 seconds
+                const endX = -snippet.offsetWidth - 2000;
+
+                gsap.to(snippet, {
+                    x: endX,
+                    duration: duration,
+                    ease: "none",
+                });
+
+                // Gentle opacity animation
+                gsap.fromTo(
+                    snippet,
+                    { opacity: 0 },
+                    {
+                        opacity: 0.5,
+                        duration: 40,
+                        ease: "power2.out",
+                    },
+                );
+
+                gsap.to(snippet, {
+                    opacity: 0.1,
+                    duration: 50,
+                    delay: duration - 8,
+                    ease: "power2.in",
+                    onComplete: () => {
+                        if (snippet.parentNode) {
+                            snippet.parentNode.removeChild(snippet);
+                        }
+                        const index = activeSnippets.indexOf(snippet);
+                        if (index > -1) {
+                            activeSnippets.splice(index, 1);
+                        }
+                    },
+                });
+            }
+
+            // Create snippets at random intervals
+            function scheduleNextSnippet() {
+                const delay = 8 + Math.random() * 600; // 8-20 seconds
+                setTimeout(() => {
+                    createStringSnippet();
+                    scheduleNextSnippet();
+                }, delay);
+            }
+
+            // Load strings and start the animation
+            loadStrings().then(() => {
+                // Start the animation
+                scheduleNextSnippet();
+
+                // Create initial snippets with staggered timing
+                setTimeout(() => createStringSnippet(), 2000);
+                setTimeout(() => createStringSnippet(), 6000);
+                setTimeout(() => createStringSnippet(), 10000);
+                setTimeout(() => createStringSnippet(), 14000);
+                setTimeout(() => createStringSnippet(), 18000);
+            });
+
+            // Handle window resize
+            window.addEventListener("resize", () => {
+                // Clear existing snippets on resize to prevent layout issues
+                activeSnippets.forEach((snippet) => {
+                    if (snippet.parentNode) {
+                        snippet.parentNode.removeChild(snippet);
+                    }
+                });
+                activeSnippets.length = 0;
+            });
+        </script>
+    </body>
+</html>

@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Animated Code Background</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: "Courier New", monospace;
+                background: linear-gradient(
+                    135deg,
+                    #1e2030 0%,
+                    #181926 50%,
+                    #24273a 100%
+                );
+                overflow: hidden;
+                height: 100vh;
+                position: relative;
+            }
+
+            .code-container {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+            }
+
+            .code-snippet {
+                position: absolute;
+                font-size: 14px;
+                font-weight: 500;
+                white-space: nowrap;
+                opacity: 0.8;
+                filter: blur(0.5px);
+                text-shadow: 0 0 10px currentColor;
+            }
+
+            .code-snippet.large {
+                font-size: 18px;
+                opacity: 0.9;
+                filter: blur(0px);
+            }
+
+            .code-snippet.small {
+                font-size: 12px;
+                opacity: 0.6;
+                filter: blur(1px);
+            }
+
+            /* Syntax highlighting classes */
+            .keyword {
+                color: #c6a0f6;
+            }
+            .function {
+                color: #8aadf4;
+            }
+            .string {
+                color: #a6da95;
+            }
+            .comment {
+                color: #6e738d;
+            }
+            .variable {
+                color: #f0c6c6;
+            }
+            .operator {
+                color: #ed8796;
+            }
+            .number {
+                color: #f5a97f;
+            }
+            .bracket {
+                color: #91d7e3;
+            }
+            .method {
+                color: #7dc4e4;
+            }
+            .property {
+                color: #eed49f;
+            }
+            .type {
+                color: #f5bde6;
+            }
+            .constant {
+                color: #8bd5ca;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="code-container" id="codeContainer"></div>
+
+        <script>
+            // Code snippets with syntax highlighting
+            const codeSnippets = [
+                '<span class="keyword">const</span> <span class="variable">user</span> <span class="operator">=</span> <span class="method">await</span> <span class="function">fetchUser</span><span class="bracket">(</span><span class="variable">id</span><span class="bracket">)</span>',
+                '<span class="keyword">function</span> <span class="function">calculateDistance</span><span class="bracket">(</span><span class="variable">x1</span>, <span class="variable">y1</span>, <span class="variable">x2</span>, <span class="variable">y2</span><span class="bracket">)</span> <span class="bracket">{</span>',
+                '<span class="keyword">if</span> <span class="bracket">(</span><span class="variable">condition</span> <span class="operator">&&</span> <span class="variable">isValid</span><span class="bracket">)</span> <span class="bracket">{</span>',
+                '<span class="keyword">return</span> <span class="variable">data</span><span class="operator">.</span><span class="method">map</span><span class="bracket">(</span><span class="variable">item</span> <span class="operator">=></span> <span class="variable">item</span><span class="operator">.</span><span class="property">value</span><span class="bracket">)</span>',
+                '<span class="comment">// Optimize performance with memoization</span>',
+                '<span class="keyword">const</span> <span class="variable">result</span> <span class="operator">=</span> <span class="variable">cache</span><span class="operator">.</span><span class="method">get</span><span class="bracket">(</span><span class="variable">key</span><span class="bracket">)</span> <span class="operator">||</span> <span class="function">compute</span><span class="bracket">(</span><span class="variable">value</span><span class="bracket">)</span>',
+                '<span class="keyword">try</span> <span class="bracket">{</span> <span class="keyword">await</span> <span class="function">processData</span><span class="bracket">(</span><span class="variable">input</span><span class="bracket">)</span> <span class="bracket">}</span> <span class="keyword">catch</span> <span class="bracket">(</span><span class="variable">error</span><span class="bracket">)</span>',
+                '<span class="type">interface</span> <span class="type">ApiResponse</span><span class="operator">&lt;</span><span class="type">T</span><span class="operator">&gt;</span> <span class="bracket">{</span> <span class="property">data</span><span class="operator">:</span> <span class="type">T</span><span class="bracket">;</span> <span class="bracket">}</span>',
+                '<span class="keyword">for</span> <span class="bracket">(</span><span class="keyword">let</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span><span class="bracket">;</span> <span class="variable">i</span> <span class="operator">&lt;</span> <span class="variable">array</span><span class="operator">.</span><span class="property">length</span><span class="bracket">;</span> <span class="variable">i</span><span class="operator">++</span><span class="bracket">)</span>',
+                '<span class="variable">setState</span><span class="bracket">(</span><span class="variable">prevState</span> <span class="operator">=></span> <span class="bracket">({</span> <span class="operator">...</span><span class="variable">prevState</span>, <span class="property">loading</span><span class="operator">:</span> <span class="constant">false</span> <span class="bracket">})</span><span class="bracket">)</span>',
+                '<span class="keyword">class</span> <span class="type">EventEmitter</span> <span class="keyword">extends</span> <span class="type">Observable</span> <span class="bracket">{</span>',
+                '<span class="keyword">const</span> <span class="variable">throttledFn</span> <span class="operator">=</span> <span class="function">throttle</span><span class="bracket">(</span><span class="variable">callback</span>, <span class="number">100</span><span class="bracket">)</span>',
+                '<span class="variable">document</span><span class="operator">.</span><span class="method">addEventListener</span><span class="bracket">(</span><span class="string">"scroll"</span>, <span class="variable">handler</span><span class="bracket">)</span>',
+                '<span class="keyword">import</span> <span class="bracket">{</span> <span class="variable">useState</span>, <span class="variable">useEffect</span> <span class="bracket">}</span> <span class="keyword">from</span> <span class="string">"react"</span>',
+                '<span class="variable">console</span><span class="operator">.</span><span class="method">log</span><span class="bracket">(</span><span class="string">`Processing ${</span><span class="variable">items</span><span class="operator">.</span><span class="property">length</span><span class="string">} items`</span><span class="bracket">)</span>',
+                '<span class="keyword">switch</span> <span class="bracket">(</span><span class="variable">action</span><span class="operator">.</span><span class="property">type</span><span class="bracket">)</span> <span class="bracket">{</span> <span class="keyword">case</span> <span class="string">"UPDATE"</span><span class="operator">:</span>',
+                '<span class="keyword">const</span> <span class="variable">promise</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Promise</span><span class="bracket">(</span><span class="variable">resolve</span> <span class="operator">=></span> <span class="function">setTimeout</span><span class="bracket">(</span><span class="variable">resolve</span>, <span class="number">1000</span><span class="bracket">)</span><span class="bracket">)</span>',
+                '<span class="variable">array</span><span class="operator">.</span><span class="method">filter</span><span class="bracket">(</span><span class="variable">item</span> <span class="operator">=></span> <span class="variable">item</span><span class="operator">.</span><span class="property">active</span><span class="bracket">)</span><span class="operator">.</span><span class="method">sort</span><span class="bracket">(</span><span class="variable">compareFunction</span><span class="bracket">)</span>',
+                '<span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">function</span> <span class="function">Component</span><span class="bracket">()</span> <span class="bracket">{</span>',
+                '<span class="variable">db</span><span class="operator">.</span><span class="method">collection</span><span class="bracket">(</span><span class="string">"users"</span><span class="bracket">)</span><span class="operator">.</span><span class="method">where</span><span class="bracket">(</span><span class="string">"age"</span>, <span class="string">">"</span>, <span class="number">18</span><span class="bracket">)</span>',
+                '<span class="keyword">async</span> <span class="keyword">function</span> <span class="function">processQueue</span><span class="bracket">()</span> <span class="bracket">{</span> <span class="keyword">while</span> <span class="bracket">(</span><span class="variable">queue</span><span class="operator">.</span><span class="property">length</span><span class="bracket">)</span> <span class="bracket">{</span>',
+                '<span class="variable">React</span><span class="operator">.</span><span class="method">useCallback</span><span class="bracket">(</span><span class="bracket">(</span><span class="bracket">)</span> <span class="operator">=></span> <span class="bracket">{</span> <span class="function">setCounter</span><span class="bracket">(</span><span class="variable">c</span> <span class="operator">=></span> <span class="variable">c</span> <span class="operator">+</span> <span class="number">1</span><span class="bracket">)</span> <span class="bracket">}</span>, <span class="bracket">[</span><span class="bracket">]</span><span class="bracket">)</span>',
+                '<span class="keyword">let</span> <span class="variable">response</span> <span class="operator">=</span> <span class="method">await</span> <span class="function">fetch</span><span class="bracket">(</span><span class="string">"/api/data"</span>, <span class="bracket">{</span> <span class="property">method</span><span class="operator">:</span> <span class="string">"POST"</span> <span class="bracket">}</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">debounced</span> <span class="operator">=</span> <span class="function">debounce</span><span class="bracket">(</span><span class="variable">handleSearch</span>, <span class="number">300</span><span class="bracket">)</span>',
+                '<span class="variable">Object</span><span class="operator">.</span><span class="method">keys</span><span class="bracket">(</span><span class="variable">obj</span><span class="bracket">)</span><span class="operator">.</span><span class="method">forEach</span><span class="bracket">(</span><span class="variable">key</span> <span class="operator">=></span> <span class="variable">console</span><span class="operator">.</span><span class="method">log</span><span class="bracket">(</span><span class="variable">key</span><span class="bracket">)</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="bracket">[</span><span class="variable">state</span>, <span class="variable">dispatch</span><span class="bracket">]</span> <span class="operator">=</span> <span class="function">useReducer</span><span class="bracket">(</span><span class="variable">reducer</span>, <span class="variable">initialState</span><span class="bracket">)</span>',
+                '<span class="comment">// TODO: Implement error boundary</span>',
+                '<span class="keyword">const</span> <span class="variable">memoizedValue</span> <span class="operator">=</span> <span class="function">useMemo</span><span class="bracket">(</span><span class="bracket">(</span><span class="bracket">)</span> <span class="operator">=></span> <span class="function">expensiveCalc</span><span class="bracket">(</span><span class="variable">input</span><span class="bracket">)</span>, <span class="bracket">[</span><span class="variable">input</span><span class="bracket">]</span><span class="bracket">)</span>',
+                '<span class="variable">window</span><span class="operator">.</span><span class="method">localStorage</span><span class="operator">.</span><span class="method">setItem</span><span class="bracket">(</span><span class="string">"key"</span>, <span class="variable">JSON</span><span class="operator">.</span><span class="method">stringify</span><span class="bracket">(</span><span class="variable">data</span><span class="bracket">)</span><span class="bracket">)</span>',
+                '<span class="keyword">catch</span> <span class="bracket">(</span><span class="variable">err</span><span class="bracket">)</span> <span class="bracket">{</span> <span class="variable">logger</span><span class="operator">.</span><span class="method">error</span><span class="bracket">(</span><span class="string">"Failed to process:"</span>, <span class="variable">err</span><span class="bracket">)</span> <span class="bracket">}</span>',
+                '<span class="keyword">const</span> <span class="variable">regex</span> <span class="operator">=</span> <span class="string">/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/</span>',
+                '<span class="variable">app</span><span class="operator">.</span><span class="method">use</span><span class="bracket">(</span><span class="function">express</span><span class="operator">.</span><span class="method">json</span><span class="bracket">(</span><span class="bracket">)</span><span class="bracket">)</span><span class="operator">.</span><span class="method">use</span><span class="bracket">(</span><span class="function">cors</span><span class="bracket">(</span><span class="bracket">)</span><span class="bracket">)</span>',
+                '<span class="keyword">while</span> <span class="bracket">(</span><span class="variable">iterator</span><span class="operator">.</span><span class="method">hasNext</span><span class="bracket">(</span><span class="bracket">)</span><span class="bracket">)</span> <span class="bracket">{</span> <span class="variable">process</span><span class="bracket">(</span><span class="variable">iterator</span><span class="operator">.</span><span class="method">next</span><span class="bracket">(</span><span class="bracket">)</span><span class="bracket">)</span> <span class="bracket">}</span>',
+                '<span class="keyword">import</span> <span class="operator">*</span> <span class="keyword">as</span> <span class="variable">React</span> <span class="keyword">from</span> <span class="string">"react"</span>',
+                '<span class="variable">process</span><span class="operator">.</span><span class="property">env</span><span class="operator">.</span><span class="property">NODE_ENV</span> <span class="operator">===</span> <span class="string">"development"</span> <span class="operator">&&</span> <span class="variable">console</span><span class="operator">.</span><span class="method">log</span><span class="bracket">(</span><span class="string">"Debug mode"</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">config</span> <span class="operator">=</span> <span class="bracket">{</span> <span class="property">baseURL</span><span class="operator">:</span> <span class="string">"https://api.example.com"</span>, <span class="property">timeout</span><span class="operator">:</span> <span class="number">5000</span> <span class="bracket">}</span>',
+                '<span class="type">type</span> <span class="type">User</span> <span class="operator">=</span> <span class="bracket">{</span> <span class="property">id</span><span class="operator">:</span> <span class="type">string</span><span class="bracket">;</span> <span class="property">name</span><span class="operator">:</span> <span class="type">string</span><span class="bracket">;</span> <span class="property">email</span><span class="operator">:</span> <span class="type">string</span> <span class="bracket">}</span>',
+                '<span class="keyword">export</span> <span class="keyword">const</span> <span class="variable">API_ENDPOINTS</span> <span class="operator">=</span> <span class="bracket">{</span> <span class="property">USERS</span><span class="operator">:</span> <span class="string">"/users"</span>, <span class="property">POSTS</span><span class="operator">:</span> <span class="string">"/posts"</span> <span class="bracket">}</span>',
+                '<span class="variable">axios</span><span class="operator">.</span><span class="method">interceptors</span><span class="operator">.</span><span class="property">request</span><span class="operator">.</span><span class="method">use</span><span class="bracket">(</span><span class="variable">config</span> <span class="operator">=></span> <span class="bracket">{</span> <span class="keyword">return</span> <span class="variable">config</span> <span class="bracket">}</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">isProduction</span> <span class="operator">=</span> <span class="variable">process</span><span class="operator">.</span><span class="property">env</span><span class="operator">.</span><span class="property">NODE_ENV</span> <span class="operator">===</span> <span class="string">"production"</span>',
+                '<span class="variable">mongoose</span><span class="operator">.</span><span class="method">connect</span><span class="bracket">(</span><span class="variable">DB_URL</span>, <span class="bracket">{</span> <span class="property">useNewUrlParser</span><span class="operator">:</span> <span class="constant">true</span> <span class="bracket">}</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">schema</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Schema</span><span class="bracket">(</span><span class="bracket">{</span> <span class="property">name</span><span class="operator">:</span> <span class="type">String</span>, <span class="property">createdAt</span><span class="operator">:</span> <span class="type">Date</span> <span class="bracket">}</span><span class="bracket">)</span>',
+                '<span class="variable">router</span><span class="operator">.</span><span class="method">get</span><span class="bracket">(</span><span class="string">"/api/users/:id"</span>, <span class="variable">authenticate</span>, <span class="variable">getUserById</span><span class="bracket">)</span>',
+                '<span class="comment">// Middleware for authentication</span>',
+                '<span class="keyword">const</span> <span class="variable">middleware</span> <span class="operator">=</span> <span class="bracket">(</span><span class="variable">req</span>, <span class="variable">res</span>, <span class="variable">next</span><span class="bracket">)</span> <span class="operator">=></span> <span class="bracket">{</span> <span class="function">next</span><span class="bracket">(</span><span class="bracket">)</span> <span class="bracket">}</span>',
+                '<span class="keyword">const</span> <span class="variable">validation</span> <span class="operator">=</span> <span class="function">joi</span><span class="operator">.</span><span class="method">object</span><span class="bracket">(</span><span class="bracket">{</span> <span class="property">email</span><span class="operator">:</span> <span class="function">joi</span><span class="operator">.</span><span class="method">string</span><span class="bracket">(</span><span class="bracket">)</span><span class="operator">.</span><span class="method">email</span><span class="bracket">(</span><span class="bracket">)</span> <span class="bracket">}</span><span class="bracket">)</span>',
+                '<span class="variable">jest</span><span class="operator">.</span><span class="method">mock</span><span class="bracket">(</span><span class="string">"./utils"</span>, <span class="bracket">(</span><span class="bracket">)</span> <span class="operator">=></span> <span class="bracket">({</span> <span class="property">helper</span><span class="operator">:</span> <span class="function">jest</span><span class="operator">.</span><span class="method">fn</span><span class="bracket">(</span><span class="bracket">)</span> <span class="bracket">})</span><span class="bracket">)</span>',
+                '<span class="function">describe</span><span class="bracket">(</span><span class="string">"User Service"</span>, <span class="bracket">(</span><span class="bracket">)</span> <span class="operator">=></span> <span class="bracket">{</span> <span class="function">test</span><span class="bracket">(</span><span class="string">"should create user"</span>, <span class="variable">async</span> <span class="bracket">(</span><span class="bracket">)</span> <span class="operator">=></span> <span class="bracket">{</span>',
+                '<span class="function">expect</span><span class="bracket">(</span><span class="variable">result</span><span class="bracket">)</span><span class="operator">.</span><span class="method">toBe</span><span class="bracket">(</span><span class="constant">true</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">component</span> <span class="operator">=</span> <span class="function">render</span><span class="bracket">(</span><span class="operator">&lt;</span><span class="type">Button</span> <span class="property">onClick</span><span class="operator">=</span><span class="bracket">{</span><span class="variable">handler</span><span class="bracket">}</span> <span class="operator">/&gt;</span><span class="bracket">)</span>',
+                '<span class="variable">fireEvent</span><span class="operator">.</span><span class="method">click</span><span class="bracket">(</span><span class="variable">screen</span><span class="operator">.</span><span class="method">getByText</span><span class="bracket">(</span><span class="string">"Submit"</span><span class="bracket">)</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">store</span> <span class="operator">=</span> <span class="function">createStore</span><span class="bracket">(</span><span class="variable">reducer</span>, <span class="function">applyMiddleware</span><span class="bracket">(</span><span class="variable">thunk</span><span class="bracket">)</span><span class="bracket">)</span>',
+                '<span class="variable">dispatch</span><span class="bracket">(</span><span class="bracket">{</span> <span class="property">type</span><span class="operator">:</span> <span class="string">"SET_LOADING"</span>, <span class="property">payload</span><span class="operator">:</span> <span class="constant">true</span> <span class="bracket">}</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">selector</span> <span class="operator">=</span> <span class="function">createSelector</span><span class="bracket">(</span><span class="variable">getUsers</span>, <span class="variable">users</span> <span class="operator">=></span> <span class="variable">users</span><span class="operator">.</span><span class="method">filter</span><span class="bracket">(</span><span class="variable">u</span> <span class="operator">=></span> <span class="variable">u</span><span class="operator">.</span><span class="property">active</span><span class="bracket">)</span><span class="bracket">)</span>',
+                '<span class="variable">styled</span><span class="operator">.</span><span class="property">div</span><span class="string">`background: ${props => props.primary ? "blue" : "gray"};`</span>',
+                '<span class="keyword">const</span> <span class="variable">theme</span> <span class="operator">=</span> <span class="bracket">{</span> <span class="property">colors</span><span class="operator">:</span> <span class="bracket">{</span> <span class="property">primary</span><span class="operator">:</span> <span class="string">"#007bff"</span> <span class="bracket">}</span> <span class="bracket">}</span>',
+                '<span class="variable">graphql</span><span class="string">`query GetUser($id: ID!) { user(id: $id) { name email } }`</span>',
+                '<span class="keyword">const</span> <span class="variable">client</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="type">ApolloClient</span><span class="bracket">(</span><span class="bracket">{</span> <span class="property">uri</span><span class="operator">:</span> <span class="string">"/graphql"</span> <span class="bracket">}</span><span class="bracket">)</span>',
+                '<span class="variable">useQuery</span><span class="bracket">(</span><span class="variable">GET_USERS</span>, <span class="bracket">{</span> <span class="property">variables</span><span class="operator">:</span> <span class="bracket">{</span> <span class="property">limit</span><span class="operator">:</span> <span class="number">10</span> <span class="bracket">}</span> <span class="bracket">}</span><span class="bracket">)</span>',
+                '<span class="variable">mutation</span><span class="operator">.</span><span class="method">mutate</span><span class="bracket">(</span><span class="bracket">{</span> <span class="property">createUser</span><span class="operator">:</span> <span class="bracket">{</span> <span class="property">name</span>, <span class="property">email</span> <span class="bracket">}</span> <span class="bracket">}</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">server</span> <span class="operator">=</span> <span class="function">createServer</span><span class="bracket">(</span><span class="variable">app</span><span class="bracket">)</span><span class="operator">.</span><span class="method">listen</span><span class="bracket">(</span><span class="variable">PORT</span><span class="bracket">)</span>',
+                '<span class="variable">websocket</span><span class="operator">.</span><span class="method">on</span><span class="bracket">(</span><span class="string">"message"</span>, <span class="variable">data</span> <span class="operator">=></span> <span class="variable">broadcast</span><span class="bracket">(</span><span class="variable">data</span><span class="bracket">)</span><span class="bracket">)</span>',
+                '<span class="variable">docker</span> <span class="operator">run</span> <span class="operator">-p</span> <span class="number">3000</span><span class="operator">:</span><span class="number">3000</span> <span class="variable">my-app</span>',
+                '<span class="variable">kubectl</span> <span class="operator">apply</span> <span class="operator">-f</span> <span class="variable">deployment</span><span class="operator">.</span><span class="property">yaml</span>',
+                '<span class="keyword">FROM</span> <span class="variable">node</span><span class="operator">:</span><span class="number">16</span><span class="operator">-</span><span class="variable">alpine</span> <span class="keyword">as</span> <span class="variable">builder</span>',
+                '<span class="keyword">COPY</span> <span class="variable">package</span><span class="operator">*.</span><span class="variable">json</span> <span class="operator">./</span>',
+                '<span class="keyword">RUN</span> <span class="variable">npm</span> <span class="operator">ci</span> <span class="operator">--</span><span class="variable">only</span><span class="operator">=</span><span class="variable">production</span>',
+                '<span class="variable">git</span> <span class="operator">commit</span> <span class="operator">-m</span> <span class="string">"feat: add user authentication"</span>',
+                '<span class="variable">git</span> <span class="operator">push</span> <span class="variable">origin</span> <span class="variable">feature</span><span class="operator">/</span><span class="variable">auth</span>',
+                '<span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="variable">users</span> <span class="keyword">WHERE</span> <span class="variable">created_at</span> <span class="operator">&gt;</span> <span class="string">"2023-01-01"</span>',
+                '<span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="variable">posts</span> <span class="bracket">(</span><span class="variable">title</span>, <span class="variable">content</span><span class="bracket">)</span> <span class="keyword">VALUES</span> <span class="bracket">(</span><span class="string">"Hello"</span>, <span class="string">"World"</span><span class="bracket">)</span>',
+                '<span class="keyword">UPDATE</span> <span class="variable">users</span> <span class="keyword">SET</span> <span class="variable">last_login</span> <span class="operator">=</span> <span class="function">NOW</span><span class="bracket">(</span><span class="bracket">)</span> <span class="keyword">WHERE</span> <span class="variable">id</span> <span class="operator">=</span> <span class="number">1</span>',
+                '<span class="keyword">const</span> <span class="variable">pipeline</span> <span class="operator">=</span> <span class="bracket">[</span><span class="bracket">{</span> <span class="property">$match</span><span class="operator">:</span> <span class="bracket">{</span> <span class="property">active</span><span class="operator">:</span> <span class="constant">true</span> <span class="bracket">}</span> <span class="bracket">}</span>, <span class="bracket">{</span> <span class="property">$group</span><span class="operator">:</span> <span class="bracket">{</span> <span class="property">_id</span><span class="operator">:</span> <span class="string">"$category"</span> <span class="bracket">}</span> <span class="bracket">}</span><span class="bracket">]</span>',
+                '<span class="variable">Model</span><span class="operator">.</span><span class="method">aggregate</span><span class="bracket">(</span><span class="variable">pipeline</span><span class="bracket">)</span><span class="operator">.</span><span class="method">exec</span><span class="bracket">(</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">redis</span> <span class="operator">=</span> <span class="function">require</span><span class="bracket">(</span><span class="string">"redis"</span><span class="bracket">)</span><span class="operator">.</span><span class="method">createClient</span><span class="bracket">(</span><span class="bracket">)</span>',
+                '<span class="variable">redis</span><span class="operator">.</span><span class="method">set</span><span class="bracket">(</span><span class="string">"key"</span>, <span class="string">"value"</span>, <span class="string">"EX"</span>, <span class="number">3600</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">queue</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Bull</span><span class="bracket">(</span><span class="string">"email queue"</span>, <span class="variable">redisConfig</span><span class="bracket">)</span>',
+                '<span class="variable">queue</span><span class="operator">.</span><span class="method">add</span><span class="bracket">(</span><span class="string">"send email"</span>, <span class="bracket">{</span> <span class="property">to</span><span class="operator">:</span> <span class="string">"user@example.com"</span> <span class="bracket">}</span><span class="bracket">)</span>',
+                '<span class="variable">cron</span><span class="operator">.</span><span class="method">schedule</span><span class="bracket">(</span><span class="string">"0 0 * * *"</span>, <span class="bracket">(</span><span class="bracket">)</span> <span class="operator">=></span> <span class="function">cleanupOldData</span><span class="bracket">(</span><span class="bracket">)</span><span class="bracket">)</span>',
+                '<span class="variable">winston</span><span class="operator">.</span><span class="method">createLogger</span><span class="bracket">(</span><span class="bracket">{</span> <span class="property">level</span><span class="operator">:</span> <span class="string">"info"</span>, <span class="property">transports</span><span class="operator">:</span> <span class="bracket">[</span><span class="keyword">new</span> <span class="variable">winston</span><span class="operator">.</span><span class="property">transports</span><span class="operator">.</span><span class="property">File</span><span class="bracket">(</span><span class="bracket">)</span><span class="bracket">]</span> <span class="bracket">}</span><span class="bracket">)</span>',
+                '<span class="variable">logger</span><span class="operator">.</span><span class="method">info</span><span class="bracket">(</span><span class="string">"Processing request"</span>, <span class="bracket">{</span> <span class="property">userId</span>, <span class="property">timestamp</span> <span class="bracket">}</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">helmet</span> <span class="operator">=</span> <span class="function">require</span><span class="bracket">(</span><span class="string">"helmet"</span><span class="bracket">)</span>',
+                '<span class="variable">app</span><span class="operator">.</span><span class="method">use</span><span class="bracket">(</span><span class="function">helmet</span><span class="bracket">(</span><span class="bracket">)</span><span class="bracket">)</span><span class="operator">.</span><span class="method">use</span><span class="bracket">(</span><span class="function">rateLimit</span><span class="bracket">(</span><span class="bracket">{</span> <span class="property">windowMs</span><span class="operator">:</span> <span class="number">15</span> <span class="operator">*</span> <span class="number">60</span> <span class="operator">*</span> <span class="number">1000</span> <span class="bracket">}</span><span class="bracket">)</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">jwt</span> <span class="operator">=</span> <span class="function">require</span><span class="bracket">(</span><span class="string">"jsonwebtoken"</span><span class="bracket">)</span><span class="operator">.</span><span class="method">sign</span><span class="bracket">(</span><span class="variable">payload</span>, <span class="variable">secret</span><span class="bracket">)</span>',
+                '<span class="variable">bcrypt</span><span class="operator">.</span><span class="method">compare</span><span class="bracket">(</span><span class="variable">password</span>, <span class="variable">hash</span><span class="bracket">)</span><span class="operator">.</span><span class="method">then</span><span class="bracket">(</span><span class="variable">result</span> <span class="operator">=></span> <span class="variable">result</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">upload</span> <span class="operator">=</span> <span class="function">multer</span><span class="bracket">(</span><span class="bracket">{</span> <span class="property">dest</span><span class="operator">:</span> <span class="string">"uploads/"</span> <span class="bracket">}</span><span class="bracket">)</span>',
+                '<span class="variable">fs</span><span class="operator">.</span><span class="method">readFile</span><span class="bracket">(</span><span class="variable">filename</span>, <span class="string">"utf8"</span>, <span class="bracket">(</span><span class="variable">err</span>, <span class="variable">data</span><span class="bracket">)</span> <span class="operator">=></span> <span class="variable">console</span><span class="operator">.</span><span class="method">log</span><span class="bracket">(</span><span class="variable">data</span><span class="bracket">)</span><span class="bracket">)</span>',
+                '<span class="variable">path</span><span class="operator">.</span><span class="method">join</span><span class="bracket">(</span><span class="variable">__dirname</span>, <span class="string">"public"</span>, <span class="variable">req</span><span class="operator">.</span><span class="property">url</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">crypto</span> <span class="operator">=</span> <span class="function">require</span><span class="bracket">(</span><span class="string">"crypto"</span><span class="bracket">)</span><span class="operator">.</span><span class="method">randomBytes</span><span class="bracket">(</span><span class="number">32</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">buffer</span> <span class="operator">=</span> <span class="type">Buffer</span><span class="operator">.</span><span class="method">from</span><span class="bracket">(</span><span class="string">"hello world"</span>, <span class="string">"utf8"</span><span class="bracket">)</span>',
+                '<span class="variable">stream</span><span class="operator">.</span><span class="method">pipe</span><span class="bracket">(</span><span class="variable">transform</span><span class="bracket">)</span><span class="operator">.</span><span class="method">pipe</span><span class="bracket">(</span><span class="variable">output</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">cluster</span> <span class="operator">=</span> <span class="function">require</span><span class="bracket">(</span><span class="string">"cluster"</span><span class="bracket">)</span>',
+                '<span class="keyword">if</span> <span class="bracket">(</span><span class="variable">cluster</span><span class="operator">.</span><span class="property">isMaster</span><span class="bracket">)</span> <span class="bracket">{</span> <span class="variable">cluster</span><span class="operator">.</span><span class="method">fork</span><span class="bracket">(</span><span class="bracket">)</span> <span class="bracket">}</span>',
+                '<span class="variable">EventEmitter</span><span class="operator">.</span><span class="method">once</span><span class="bracket">(</span><span class="string">"data"</span>, <span class="variable">handler</span><span class="bracket">)</span><span class="operator">.</span><span class="method">emit</span><span class="bracket">(</span><span class="string">"data"</span>, <span class="variable">payload</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">worker</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Worker</span><span class="bracket">(</span><span class="string">"worker.js"</span><span class="bracket">)</span>',
+                '<span class="variable">worker</span><span class="operator">.</span><span class="method">postMessage</span><span class="bracket">(</span><span class="variable">data</span><span class="bracket">)</span><span class="operator">.</span><span class="method">on</span><span class="bracket">(</span><span class="string">"message"</span>, <span class="variable">handleResult</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">performance</span> <span class="operator">=</span> <span class="function">require</span><span class="bracket">(</span><span class="string">"perf_hooks"</span><span class="bracket">)</span><span class="operator">.</span><span class="property">performance</span>',
+                '<span class="variable">performance</span><span class="operator">.</span><span class="method">mark</span><span class="bracket">(</span><span class="string">"start"</span><span class="bracket">)</span><span class="operator">.</span><span class="method">measure</span><span class="bracket">(</span><span class="string">"duration"</span>, <span class="string">"start"</span><span class="bracket">)</span>',
+                '<span class="variable">AbortController</span><span class="operator">.</span><span class="method">abort</span><span class="bracket">(</span><span class="bracket">)</span><span class="operator">.</span><span class="property">signal</span><span class="operator">.</span><span class="method">addEventListener</span><span class="bracket">(</span><span class="string">"abort"</span>, <span class="variable">cleanup</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">proxy</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Proxy</span><span class="bracket">(</span><span class="variable">target</span>, <span class="bracket">{</span> <span class="property">get</span><span class="operator">:</span> <span class="variable">interceptor</span> <span class="bracket">}</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">map</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Map</span><span class="bracket">(</span><span class="bracket">)</span><span class="operator">.</span><span class="method">set</span><span class="bracket">(</span><span class="string">"key"</span>, <span class="variable">value</span><span class="bracket">)</span><span class="operator">.</span><span class="method">get</span><span class="bracket">(</span><span class="string">"key"</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">set</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Set</span><span class="bracket">(</span><span class="bracket">[</span><span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span><span class="bracket">]</span><span class="bracket">)</span><span class="operator">.</span><span class="method">has</span><span class="bracket">(</span><span class="number">2</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">weakMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="type">WeakMap</span><span class="bracket">(</span><span class="bracket">)</span><span class="operator">.</span><span class="method">set</span><span class="bracket">(</span><span class="variable">obj</span>, <span class="variable">metadata</span><span class="bracket">)</span>',
+                '<span class="variable">Symbol</span><span class="operator">.</span><span class="method">for</span><span class="bracket">(</span><span class="string">"global"</span><span class="bracket">)</span> <span class="operator">===</span> <span class="variable">Symbol</span><span class="operator">.</span><span class="method">for</span><span class="bracket">(</span><span class="string">"global"</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">generator</span> <span class="operator">=</span> <span class="keyword">function</span><span class="operator">*</span><span class="bracket">(</span><span class="bracket">)</span> <span class="bracket">{</span> <span class="keyword">yield</span> <span class="number">1</span><span class="bracket">;</span> <span class="keyword">yield</span> <span class="number">2</span> <span class="bracket">}</span>',
+                '<span class="keyword">for</span> <span class="bracket">(</span><span class="keyword">const</span> <span class="variable">value</span> <span class="keyword">of</span> <span class="function">generator</span><span class="bracket">(</span><span class="bracket">)</span><span class="bracket">)</span> <span class="variable">console</span><span class="operator">.</span><span class="method">log</span><span class="bracket">(</span><span class="variable">value</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="bracket">{</span> <span class="variable">name</span>, <span class="variable">age</span>, <span class="operator">...</span><span class="variable">rest</span> <span class="bracket">}</span> <span class="operator">=</span> <span class="variable">person</span>',
+                '<span class="keyword">const</span> <span class="variable">merged</span> <span class="operator">=</span> <span class="bracket">{</span> <span class="operator">...</span><span class="variable">obj1</span>, <span class="operator">...</span><span class="variable">obj2</span>, <span class="property">newProp</span><span class="operator">:</span> <span class="string">"value"</span> <span class="bracket">}</span>',
+                '<span class="keyword">const</span> <span class="bracket">[</span><span class="variable">first</span>, <span class="operator">...</span><span class="variable">rest</span><span class="bracket">]</span> <span class="operator">=</span> <span class="variable">array</span>',
+                '<span class="variable">fetch</span><span class="bracket">(</span><span class="variable">url</span><span class="bracket">)</span><span class="operator">.</span><span class="method">then</span><span class="bracket">(</span><span class="variable">r</span> <span class="operator">=></span> <span class="variable">r</span><span class="operator">.</span><span class="method">json</span><span class="bracket">(</span><span class="bracket">)</span><span class="bracket">)</span><span class="operator">.</span><span class="method">catch</span><span class="bracket">(</span><span class="variable">handleError</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">result</span> <span class="operator">=</span> <span class="keyword">await</span> <span class="type">Promise</span><span class="operator">.</span><span class="method">all</span><span class="bracket">(</span><span class="bracket">[</span><span class="variable">fetch1</span>, <span class="variable">fetch2</span>, <span class="variable">fetch3</span><span class="bracket">]</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">race</span> <span class="operator">=</span> <span class="keyword">await</span> <span class="type">Promise</span><span class="operator">.</span><span class="method">race</span><span class="bracket">(</span><span class="bracket">[</span><span class="variable">timeout</span>, <span class="variable">request</span><span class="bracket">]</span><span class="bracket">)</span>',
+                '<span class="keyword">const</span> <span class="variable">settled</span> <span class="operator">=</span> <span class="keyword">await</span> <span class="type">Promise</span><span class="operator">.</span><span class="method">allSettled</span><span class="bracket">(</span><span class="variable">promises</span><span class="bracket">)</span>',
+            ];
+
+            const container = document.getElementById("codeContainer");
+            const activeSnippets = [];
+
+            function createCodeSnippet() {
+                const snippet = document.createElement("div");
+                snippet.className = "code-snippet";
+
+                // Random size variation
+                const sizeRandom = Math.random();
+                if (sizeRandom < 0.2) {
+                    snippet.classList.add("large");
+                } else if (sizeRandom < 0.4) {
+                    snippet.classList.add("small");
+                }
+
+                // Random code snippet
+                snippet.innerHTML =
+                    codeSnippets[
+                        Math.floor(Math.random() * codeSnippets.length)
+                    ];
+
+                // Random vertical position
+                const yPos = Math.random() * (window.innerHeight - 50);
+                snippet.style.top = yPos + "px";
+
+                // Start from right side of screen
+                snippet.style.left = window.innerWidth + "px";
+
+                container.appendChild(snippet);
+                activeSnippets.push(snippet);
+
+                // Animate snippet moving left
+                const duration = 25 + Math.random() * 2; // 25-45 seconds
+                const endX = -snippet.offsetWidth - 2000;
+
+                gsap.to(snippet, {
+                    x: endX,
+                    duration: duration,
+                    ease: "none",
+                });
+
+                // Gentle opacity animation
+                gsap.fromTo(
+                    snippet,
+                    { opacity: 0 },
+                    {
+                        opacity: 0.5,
+                        duration: 40,
+                        ease: "power2.out",
+                    },
+                );
+
+                gsap.to(snippet, {
+                    opacity: 0.1,
+                    duration: 50,
+                    delay: duration - 8,
+                    ease: "power2.in",
+                    onComplete: () => {
+                        if (snippet.parentNode) {
+                            snippet.parentNode.removeChild(snippet);
+                        }
+                        const index = activeSnippets.indexOf(snippet);
+                        if (index > -1) {
+                            activeSnippets.splice(index, 1);
+                        }
+                    },
+                });
+            }
+
+            // Create snippets at random intervals
+            function scheduleNextSnippet() {
+                const delay = 8 + Math.random() * 600; // 8-20 seconds
+                setTimeout(() => {
+                    createCodeSnippet();
+                    scheduleNextSnippet();
+                }, delay);
+            }
+
+            // Start the animation
+            scheduleNextSnippet();
+
+            // Create initial snippets with staggered timing
+            setTimeout(() => createCodeSnippet(), 2000);
+            setTimeout(() => createCodeSnippet(), 6000);
+            setTimeout(() => createCodeSnippet(), 10000);
+            setTimeout(() => createCodeSnippet(), 14000);
+            setTimeout(() => createCodeSnippet(), 18000);
+
+            // Handle window resize
+            window.addEventListener("resize", () => {
+                // Clear existing snippets on resize to prevent layout issues
+                activeSnippets.forEach((snippet) => {
+                    if (snippet.parentNode) {
+                        snippet.parentNode.removeChild(snippet);
+                    }
+                });
+                activeSnippets.length = 0;
+            });
+        </script>
+    </body>
+</html>

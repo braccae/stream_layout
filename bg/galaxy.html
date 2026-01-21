@@ -1,0 +1,947 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Animated Galaxy Background</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body,
+            html {
+                height: 100%;
+                overflow: hidden;
+            }
+
+            .galaxy-container {
+                position: relative;
+                width: 100vw;
+                height: 100vh;
+                background: radial-gradient(
+                    ellipse at center,
+                    #24273a 0%,
+                    #1e2030 50%,
+                    #181926 100%
+                );
+            }
+
+            .star-field {
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                z-index: 20;
+                transform-origin: 75% 75%;
+            }
+
+            .star {
+                position: absolute;
+                border-radius: 50%;
+                filter: blur(0.5px);
+            }
+
+            .star-small {
+                width: 2px;
+                height: 2px;
+            }
+
+            .star-medium {
+                width: 3px;
+                height: 3px;
+            }
+
+            .star-large {
+                width: 4px;
+                height: 4px;
+                filter: blur(0.3px);
+            }
+
+            .star-extra-large {
+                width: 6px;
+                height: 6px;
+                filter: blur(0.2px);
+                box-shadow: 0 0 10px currentColor;
+            }
+
+            .shooting-star {
+                width: 8px;
+                height: 8px;
+                filter: blur(0.8px);
+                box-shadow:
+                    0 0 20px currentColor,
+                    0 0 40px currentColor,
+                    0 0 60px currentColor;
+                border-radius: 50%;
+            }
+
+            .nebula-layer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                opacity: 0.3;
+                z-index: 5;
+                background:
+                    radial-gradient(
+                        circle at 30% 40%,
+                        rgba(198, 160, 246, 0.1) 0%,
+                        transparent 50%
+                    ),
+                    radial-gradient(
+                        circle at 70% 60%,
+                        rgba(139, 213, 202, 0.1) 0%,
+                        transparent 50%
+                    ),
+                    radial-gradient(
+                        circle at 50% 30%,
+                        rgba(245, 189, 230, 0.1) 0%,
+                        transparent 50%
+                    );
+            }
+
+            .galaxy-center {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 150vw;
+                height: 150vh;
+                border-radius: 50%;
+                background: radial-gradient(
+                    circle,
+                    rgba(202, 211, 245, 0.03) 0%,
+                    rgba(138, 173, 244, 0.02) 20%,
+                    rgba(138, 173, 244, 0.01) 40%,
+                    transparent 60%
+                );
+                filter: blur(8px);
+                z-index: 1;
+            }
+
+            .fog-container {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 10;
+                pointer-events: none;
+            }
+
+            .fog-layer {
+                position: absolute;
+                border-radius: 50%;
+                filter: blur(15px);
+                opacity: 0.4;
+                mix-blend-mode: screen;
+            }
+
+            .fog-layer-1 {
+                width: 300px;
+                height: 200px;
+                background: radial-gradient(
+                    ellipse,
+                    rgba(245, 189, 230, 0.3) 0%,
+                    rgba(198, 160, 246, 0.2) 40%,
+                    transparent 70%
+                );
+            }
+
+            .fog-layer-2 {
+                width: 400px;
+                height: 150px;
+                background: radial-gradient(
+                    ellipse,
+                    rgba(139, 213, 202, 0.2) 0%,
+                    rgba(145, 215, 227, 0.2) 40%,
+                    transparent 70%
+                );
+            }
+
+            .fog-layer-3 {
+                width: 250px;
+                height: 180px;
+                background: radial-gradient(
+                    ellipse,
+                    rgba(166, 218, 149, 0.2) 0%,
+                    rgba(238, 153, 160, 0.2) 40%,
+                    transparent 70%
+                );
+            }
+
+            .fog-layer-4 {
+                width: 350px;
+                height: 120px;
+                background: radial-gradient(
+                    ellipse,
+                    rgba(183, 189, 248, 0.2) 0%,
+                    rgba(125, 196, 228, 0.2) 40%,
+                    transparent 70%
+                );
+            }
+
+            .fog-layer-5 {
+                width: 480px;
+                height: 200px;
+                background: radial-gradient(
+                    ellipse,
+                    rgba(237, 135, 150, 0.2) 0%,
+                    rgba(245, 169, 127, 0.2) 40%,
+                    transparent 70%
+                );
+            }
+
+            .fog-layer-6 {
+                width: 320px;
+                height: 160px;
+                background: radial-gradient(
+                    ellipse,
+                    rgba(238, 212, 159, 0.2) 0%,
+                    rgba(202, 211, 245, 0.2) 40%,
+                    transparent 70%
+                );
+            }
+
+            /* Additional wispy fog tendrils */
+            .fog-wisp {
+                position: absolute;
+                border-radius: 40% 60% 30% 70%;
+                filter: blur(20px);
+                opacity: 0.2;
+                mix-blend-mode: screen;
+            }
+
+            .fog-wisp-1 {
+                width: 600px;
+                height: 80px;
+                background: linear-gradient(
+                    45deg,
+                    rgba(240, 198, 198, 0.3),
+                    rgba(245, 189, 230, 0.2),
+                    transparent
+                );
+            }
+
+            .fog-wisp-2 {
+                width: 500px;
+                height: 100px;
+                background: linear-gradient(
+                    -30deg,
+                    rgba(139, 213, 202, 0.3),
+                    rgba(145, 215, 227, 0.2),
+                    transparent
+                );
+            }
+
+            .fog-wisp-3 {
+                width: 700px;
+                height: 60px;
+                background: linear-gradient(
+                    60deg,
+                    rgba(198, 160, 246, 0.3),
+                    rgba(183, 189, 248, 0.2),
+                    transparent
+                );
+            }
+        </style>
+    </head>
+    <body>
+        <div class="galaxy-container">
+            <div class="nebula-layer"></div>
+            <div class="galaxy-center"></div>
+
+            <!-- Fog layers that weave through the scene -->
+            <div class="fog-container" id="fogContainer">
+                <div class="fog-layer fog-layer-1" id="fog1"></div>
+                <div class="fog-layer fog-layer-2" id="fog2"></div>
+                <div class="fog-layer fog-layer-3" id="fog3"></div>
+                <div class="fog-layer fog-layer-4" id="fog4"></div>
+                <div class="fog-layer fog-layer-5" id="fog5"></div>
+                <div class="fog-layer fog-layer-6" id="fog6"></div>
+
+                <!-- Wispy fog tendrils -->
+                <div class="fog-wisp fog-wisp-1" id="wisp1"></div>
+                <div class="fog-wisp fog-wisp-2" id="wisp2"></div>
+                <div class="fog-wisp fog-wisp-3" id="wisp3"></div>
+
+                <!-- Additional fog layers for better coverage -->
+                <div class="fog-layer fog-layer-1" id="fog7"></div>
+                <div class="fog-layer fog-layer-2" id="fog8"></div>
+                <div class="fog-layer fog-layer-3" id="fog9"></div>
+                <div class="fog-layer fog-layer-4" id="fog10"></div>
+                <div class="fog-layer fog-layer-5" id="fog11"></div>
+                <div class="fog-layer fog-layer-6" id="fog12"></div>
+
+                <!-- More wispy fog for full coverage -->
+                <div class="fog-wisp fog-wisp-1" id="wisp4"></div>
+                <div class="fog-wisp fog-wisp-2" id="wisp5"></div>
+                <div class="fog-wisp fog-wisp-3" id="wisp6"></div>
+                <div class="fog-wisp fog-wisp-1" id="wisp7"></div>
+                <div class="fog-wisp fog-wisp-2" id="wisp8"></div>
+            </div>
+
+            <div class="star-field" id="starField"></div>
+            <div class="star-field" id="starField2"></div>
+        </div>
+
+        <script>
+            // Color palette for stars
+            const starColors = [
+                "#f4dbd6",
+                "#f0c6c6",
+                "#f5bde6",
+                "#c6a0f6",
+                "#ed8796",
+                "#ee99a0",
+                "#f5a97f",
+                "#eed49f",
+                "#a6da95",
+                "#8bd5ca",
+                "#91d7e3",
+                "#7dc4e4",
+                "#8aadf4",
+                "#b7bdf8",
+                "#cad3f5",
+                "#b8c0e0",
+                "#a5adcb",
+                "#939ab7",
+            ];
+
+            // Enhanced color palette for shooting stars
+            const shootingStarColors = [
+                "#ff6b9d",
+                "#ff8e53",
+                "#ffd93d",
+                "#6bcf7f",
+                "#4ecdc4",
+                "#45b7d1",
+                "#96ceb4",
+                "#feca57",
+                "#ff9ff3",
+                "#54a0ff",
+                "#5f27cd",
+                "#00d2d3",
+                "#ff9f43",
+                "#ee5a24",
+                "#0abde3",
+                "#10ac84",
+                "#778beb",
+                "#f8b500",
+                "#e17055",
+                "#6c5ce7",
+                "#fd79a8",
+                "#fdcb6e",
+                "#84fab0",
+                "#8fd3f4",
+                "#a29bfe",
+                "#ff7675",
+                "#74b9ff",
+                "#00b894",
+            ];
+
+            const starField = document.getElementById("starField");
+            const starField2 = document.getElementById("starField2");
+            const stars = [];
+            const stars2 = [];
+            const numStars = 200;
+
+            // Create stars
+            function createStars() {
+                for (let i = 0; i < numStars; i++) {
+                    const star = document.createElement("div");
+                    star.className = "star";
+
+                    // Random size class
+                    const sizeClasses = [
+                        "star-small",
+                        "star-small",
+                        "star-medium",
+                        "star-large",
+                        "star-extra-large",
+                    ];
+                    const sizeClass =
+                        sizeClasses[
+                            Math.floor(Math.random() * sizeClasses.length)
+                        ];
+                    star.classList.add(sizeClass);
+
+                    // Random position
+                    const x = Math.random() * 100;
+                    const y = Math.random() * 100;
+                    star.style.left = x + "%";
+                    star.style.top = y + "%";
+
+                    // Random color from palette
+                    const color =
+                        starColors[
+                            Math.floor(Math.random() * starColors.length)
+                        ];
+                    star.style.backgroundColor = color;
+                    star.style.color = color;
+
+                    starField.appendChild(star);
+                    stars.push({
+                        element: star,
+                        x: x,
+                        y: y,
+                        speed: Math.random() * 0.5 + 0.1,
+                        pulseSpeed: Math.random() * 2 + 1,
+                    });
+                }
+            }
+
+            // Create stars for second layer
+            function createStars2() {
+                for (let i = 0; i < numStars; i++) {
+                    const star = document.createElement("div");
+                    star.className = "star";
+
+                    // Random size class
+                    const sizeClasses = [
+                        "star-small",
+                        "star-small",
+                        "star-medium",
+                        "star-large",
+                        "star-extra-large",
+                    ];
+                    const sizeClass =
+                        sizeClasses[
+                            Math.floor(Math.random() * sizeClasses.length)
+                        ];
+                    star.classList.add(sizeClass);
+
+                    // Random position
+                    const x = Math.random() * 100;
+                    const y = Math.random() * 100;
+                    star.style.left = x + "%";
+                    star.style.top = y + "%";
+
+                    // Random color from palette
+                    const color =
+                        starColors[
+                            Math.floor(Math.random() * starColors.length)
+                        ];
+                    star.style.backgroundColor = color;
+                    star.style.color = color;
+
+                    starField2.appendChild(star);
+                    stars2.push({
+                        element: star,
+                        x: x,
+                        y: y,
+                        speed: Math.random() * 0.5 + 0.1,
+                        pulseSpeed: Math.random() * 2 + 1,
+                    });
+                }
+            }
+
+            // Initialize fog animations
+            function initFogAnimations() {
+                // Main fog layers - weaving motion
+                gsap.set("#fog1", { x: "10%", y: "20%" });
+                gsap.set("#fog2", { x: "70%", y: "60%" });
+                gsap.set("#fog3", { x: "30%", y: "80%" });
+                gsap.set("#fog4", { x: "80%", y: "20%" });
+                gsap.set("#fog5", { x: "50%", y: "40%" });
+                gsap.set("#fog6", { x: "20%", y: "70%" });
+
+                // Additional fog layers - distributed across screen
+                gsap.set("#fog7", { x: "80%", y: "80%" });
+                gsap.set("#fog8", { x: "10%", y: "50%" });
+                gsap.set("#fog9", { x: "90%", y: "30%" });
+                gsap.set("#fog10", { x: "40%", y: "10%" });
+                gsap.set("#fog11", { x: "60%", y: "90%" });
+                gsap.set("#fog12", { x: "30%", y: "60%" });
+
+                // Wispy fog tendrils
+                gsap.set("#wisp1", { x: "-10%", y: "30%", rotation: 15 });
+                gsap.set("#wisp2", { x: "60%", y: "70%", rotation: -20 });
+                gsap.set("#wisp3", { x: "20%", y: "10%", rotation: 45 });
+
+                // Additional wispy fog - better distribution
+                gsap.set("#wisp4", { x: "85%", y: "15%", rotation: -45 });
+                gsap.set("#wisp5", { x: "15%", y: "85%", rotation: 60 });
+                gsap.set("#wisp6", { x: "70%", y: "40%", rotation: -30 });
+                gsap.set("#wisp7", { x: "40%", y: "80%", rotation: 90 });
+                gsap.set("#wisp8", { x: "90%", y: "60%", rotation: -15 });
+
+                // Animate fog layers with weaving paths
+                const tl = gsap.timeline({ repeat: -1 });
+
+                // Fog layer 1 - figure-8 pattern
+                tl.to(
+                    "#fog1",
+                    {
+                        motionPath: {
+                            path: "M 10,20 Q 40,10 70,30 Q 40,50 10,40 Q -20,30 10,20",
+                            autoRotate: false,
+                        },
+                        duration: 45,
+                        ease: "power1.inOut",
+                    },
+                    0,
+                );
+
+                // Fog layer 2 - spiral motion
+                tl.to(
+                    "#fog2",
+                    {
+                        motionPath: {
+                            path: "M 70,60 Q 50,40 30,60 Q 50,80 70,60 Q 90,40 70,20 Q 50,40 70,60",
+                            autoRotate: false,
+                        },
+                        duration: 50,
+                        ease: "power1.inOut",
+                    },
+                    0,
+                );
+
+                // Fog layer 3 - wave pattern
+                tl.to(
+                    "#fog3",
+                    {
+                        motionPath: {
+                            path: "M 30,80 Q 60,60 90,80 Q 60,100 30,80 Q 0,60 30,40 Q 60,60 30,80",
+                            autoRotate: false,
+                        },
+                        duration: 40,
+                        ease: "power1.inOut",
+                    },
+                    0,
+                );
+
+                // Fog layer 4 - circular drift
+                tl.to(
+                    "#fog4",
+                    {
+                        motionPath: {
+                            path: "M 80,20 Q 100,40 80,60 Q 60,40 80,20",
+                            autoRotate: false,
+                        },
+                        duration: 35,
+                        ease: "power1.inOut",
+                    },
+                    0,
+                );
+
+                // Fog layer 5 - infinity pattern
+                tl.to(
+                    "#fog5",
+                    {
+                        motionPath: {
+                            path: "M 50,40 Q 30,20 10,40 Q 30,60 50,40 Q 70,20 90,40 Q 70,60 50,40",
+                            autoRotate: false,
+                        },
+                        duration: 55,
+                        ease: "power1.inOut",
+                    },
+                    0,
+                );
+
+                // Fog layer 6 - gentle drift
+                tl.to(
+                    "#fog6",
+                    {
+                        motionPath: {
+                            path: "M 20,70 Q 40,50 60,70 Q 80,90 60,110 Q 40,90 20,70",
+                            autoRotate: false,
+                        },
+                        duration: 42,
+                        ease: "power1.inOut",
+                    },
+                    0,
+                );
+
+                // Additional fog layer animations - distributed patterns
+                tl.to(
+                    "#fog7",
+                    {
+                        motionPath: {
+                            path: "M 80,80 Q 60,60 40,80 Q 60,100 80,80 Q 100,60 80,40 Q 60,60 80,80",
+                            autoRotate: false,
+                        },
+                        duration: 38,
+                        ease: "power1.inOut",
+                    },
+                    0,
+                );
+
+                tl.to(
+                    "#fog8",
+                    {
+                        motionPath: {
+                            path: "M 10,50 Q 30,30 50,50 Q 70,70 50,90 Q 30,70 10,50",
+                            autoRotate: false,
+                        },
+                        duration: 52,
+                        ease: "power1.inOut",
+                    },
+                    0,
+                );
+
+                tl.to(
+                    "#fog9",
+                    {
+                        motionPath: {
+                            path: "M 90,30 Q 70,10 50,30 Q 30,50 50,70 Q 70,50 90,30",
+                            autoRotate: false,
+                        },
+                        duration: 47,
+                        ease: "power1.inOut",
+                    },
+                    0,
+                );
+
+                tl.to(
+                    "#fog10",
+                    {
+                        motionPath: {
+                            path: "M 40,10 Q 20,30 40,50 Q 60,30 40,10 Q 20,30 40,50",
+                            autoRotate: false,
+                        },
+                        duration: 33,
+                        ease: "power1.inOut",
+                    },
+                    0,
+                );
+
+                tl.to(
+                    "#fog11",
+                    {
+                        motionPath: {
+                            path: "M 60,90 Q 80,70 100,90 Q 80,110 60,90 Q 40,70 60,50 Q 80,70 60,90",
+                            autoRotate: false,
+                        },
+                        duration: 44,
+                        ease: "power1.inOut",
+                    },
+                    0,
+                );
+
+                tl.to(
+                    "#fog12",
+                    {
+                        motionPath: {
+                            path: "M 30,60 Q 50,40 70,60 Q 90,80 70,100 Q 50,80 30,60",
+                            autoRotate: false,
+                        },
+                        duration: 49,
+                        ease: "power1.inOut",
+                    },
+                    0,
+                );
+
+                // Wispy fog animations
+                gsap.to("#wisp1", {
+                    x: "110%",
+                    y: "+=100",
+                    rotation: "+=360",
+                    duration: 80,
+                    repeat: -1,
+                    ease: "power1.inOut",
+                });
+
+                gsap.to("#wisp2", {
+                    x: "-20%",
+                    y: "-=80",
+                    rotation: "-=270",
+                    duration: 70,
+                    repeat: -1,
+                    ease: "power1.inOut",
+                });
+
+                gsap.to("#wisp3", {
+                    x: "90%",
+                    y: "+=120",
+                    rotation: "+=180",
+                    duration: 90,
+                    repeat: -1,
+                    ease: "power1.inOut",
+                });
+
+                // Additional wispy fog animations for better coverage
+                gsap.to("#wisp4", {
+                    x: "-10%",
+                    y: "-=120",
+                    rotation: "+=450",
+                    duration: 95,
+                    repeat: -1,
+                    ease: "power1.inOut",
+                });
+
+                gsap.to("#wisp5", {
+                    x: "120%",
+                    y: "+=60",
+                    rotation: "-=320",
+                    duration: 85,
+                    repeat: -1,
+                    ease: "power1.inOut",
+                });
+
+                gsap.to("#wisp6", {
+                    x: "-30%",
+                    y: "-=90",
+                    rotation: "+=270",
+                    duration: 75,
+                    repeat: -1,
+                    ease: "power1.inOut",
+                });
+
+                gsap.to("#wisp7", {
+                    x: "110%",
+                    y: "+=140",
+                    rotation: "-=180",
+                    duration: 100,
+                    repeat: -1,
+                    ease: "power1.inOut",
+                });
+
+                gsap.to("#wisp8", {
+                    x: "-20%",
+                    y: "-=110",
+                    rotation: "+=400",
+                    duration: 88,
+                    repeat: -1,
+                    ease: "power1.inOut",
+                });
+
+                // Additional opacity pulsing for fog layers
+                gsap.to(".fog-layer", {
+                    opacity: 0.1,
+                    duration: 8,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "power2.inOut",
+                    stagger: 2,
+                });
+
+                gsap.to(".fog-wisp", {
+                    opacity: 0.05,
+                    duration: 12,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "power2.inOut",
+                    stagger: 3,
+                });
+
+                // Scale variations for depth
+                gsap.to("#fog1, #fog3, #fog5", {
+                    scaleX: 1.3,
+                    scaleY: 0.8,
+                    duration: 20,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "power1.inOut",
+                    stagger: 5,
+                });
+
+                gsap.to("#fog2, #fog4, #fog6", {
+                    scaleX: 0.7,
+                    scaleY: 1.2,
+                    duration: 25,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "power1.inOut",
+                    stagger: 4,
+                });
+            }
+
+            // Initialize main animations
+            function initAnimations() {
+                // Gentle rotation of the entire star field
+                gsap.to(starField, {
+                    rotation: 360,
+                    duration: 800,
+                    repeat: -1,
+                    ease: "none",
+                });
+
+                // Counter-rotation of the second star field
+                gsap.to(starField2, {
+                    rotation: -360,
+                    duration: 1200,
+                    repeat: -1,
+                    ease: "none",
+                });
+
+                // Animate nebula layer
+                gsap.to(".nebula-layer", {
+                    rotation: -360,
+                    duration: 1000,
+                    repeat: -1,
+                    ease: "none",
+                });
+
+                // Animate galaxy center - removed scaling to prevent boundary visibility
+
+                // Individual star animations
+                stars.forEach((star, index) => {
+                    // Pulsing animation
+                    gsap.to(star.element, {
+                        opacity: 0.3,
+                        duration: star.pulseSpeed,
+                        repeat: -1,
+                        yoyo: true,
+                        ease: "power2.inOut",
+                        delay: Math.random() * 2,
+                    });
+
+                    // Scale pulsing for larger stars
+                    if (
+                        star.element.classList.contains("star-large") ||
+                        star.element.classList.contains("star-extra-large")
+                    ) {
+                        gsap.to(star.element, {
+                            scale: 1.5,
+                            duration: star.pulseSpeed * 1.5,
+                            repeat: -1,
+                            yoyo: true,
+                            ease: "power2.inOut",
+                            delay: Math.random() * 3,
+                        });
+                    }
+
+                    // Floating motion
+                    gsap.to(star.element, {
+                        y: "+=20",
+                        x: "+=10",
+                        duration: 15 + Math.random() * 10,
+                        repeat: -1,
+                        yoyo: true,
+                        ease: "power1.inOut",
+                        delay: Math.random() * 5,
+                    });
+
+                    // Additional twinkling for extra large stars
+                    if (star.element.classList.contains("star-extra-large")) {
+                        gsap.to(star.element, {
+                            boxShadow: `0 0 20px ${star.element.style.color}`,
+                            duration: 3,
+                            repeat: -1,
+                            yoyo: true,
+                            ease: "power2.inOut",
+                            delay: Math.random() * 4,
+                        });
+                    }
+                });
+
+                // Individual star animations for second layer
+                stars2.forEach((star, index) => {
+                    // Pulsing animation
+                    gsap.to(star.element, {
+                        opacity: 0.3,
+                        duration: star.pulseSpeed,
+                        repeat: -1,
+                        yoyo: true,
+                        ease: "power2.inOut",
+                        delay: Math.random() * 2,
+                    });
+
+                    // Scale pulsing for larger stars
+                    if (
+                        star.element.classList.contains("star-large") ||
+                        star.element.classList.contains("star-extra-large")
+                    ) {
+                        gsap.to(star.element, {
+                            scale: 1.5,
+                            duration: star.pulseSpeed * 1.5,
+                            repeat: -1,
+                            yoyo: true,
+                            ease: "power2.inOut",
+                            delay: Math.random() * 3,
+                        });
+                    }
+
+                    // Floating motion
+                    gsap.to(star.element, {
+                        y: "+=20",
+                        x: "+=10",
+                        duration: 15 + Math.random() * 10,
+                        repeat: -1,
+                        yoyo: true,
+                        ease: "power1.inOut",
+                        delay: Math.random() * 5,
+                    });
+
+                    // Additional twinkling for extra large stars
+                    if (star.element.classList.contains("star-extra-large")) {
+                        gsap.to(star.element, {
+                            boxShadow: `0 0 20px ${star.element.style.color}`,
+                            duration: 3,
+                            repeat: -1,
+                            yoyo: true,
+                            ease: "power2.inOut",
+                            delay: Math.random() * 4,
+                        });
+                    }
+                });
+            }
+
+            // Initialize everything
+            createStars();
+            createStars2();
+            initAnimations();
+            initFogAnimations();
+
+            // Add some shooting stars occasionally
+            function createShootingStar() {
+                const shootingStar = document.createElement("div");
+                shootingStar.className = "shooting-star";
+
+                // Use enhanced color palette for shooting stars
+                const color =
+                    shootingStarColors[
+                        Math.floor(Math.random() * shootingStarColors.length)
+                    ];
+                shootingStar.style.backgroundColor = color;
+                shootingStar.style.color = color;
+                shootingStar.style.position = "absolute";
+                shootingStar.style.left = "-20px";
+                shootingStar.style.top = Math.random() * 100 + "%";
+
+                // Add trail effect
+                shootingStar.style.background = `linear-gradient(90deg, ${color}, transparent)`;
+                shootingStar.style.width = "40px";
+                shootingStar.style.height = "3px";
+                shootingStar.style.borderRadius = "50%";
+
+                starField.appendChild(shootingStar);
+
+                gsap.to(shootingStar, {
+                    x: window.innerWidth + 150,
+                    y: "-=150",
+                    duration: 2,
+                    ease: "power2.out",
+                    onComplete: () => {
+                        shootingStar.remove();
+                    },
+                });
+
+                gsap.to(shootingStar, {
+                    opacity: 0,
+                    duration: 1.8,
+                    ease: "power2.in",
+                });
+
+                // Add pulsing glow effect
+                gsap.to(shootingStar, {
+                    boxShadow: `0 0 40px ${color}, 0 0 80px ${color}, 0 0 120px ${color}`,
+                    duration: 0.5,
+                    repeat: 3,
+                    yoyo: true,
+                    ease: "power2.inOut",
+                });
+            }
+
+            // Create shooting stars periodically
+            setInterval(createShootingStar, 15000 + Math.random() * 20000);
+        </script>
+    </body>
+</html>

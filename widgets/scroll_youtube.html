@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="https://unpkg.com/@streamerbot/client/dist/streamerbot-client.js"></script>
+        <title>Streamer.bot Twitch Chat Log</title>
+        <!-- Import a retro pixel font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                width: 100vw;
+                background-color: #333; /* Dark background for contrast */
+                font-family: "Press Start 2P", cursive, sans-serif;
+                color: white;
+                box-sizing: border-box;
+                overflow: hidden; /* Prevent all scrollbars on body */
+            }
+
+            h1 {
+                display: none;
+            }
+
+            .chat-container {
+                position: relative;
+                /* Make container fill the entire viewport */
+                width: 100vw;
+                height: 100vh;
+                max-width: 100vw;
+                max-height: 100vh;
+                overflow: hidden; /* Crucial for containing the SVG and chat content */
+                background-color: transparent; /* Allows any body background to show through, though the SVG will cover it */
+            }
+
+            .scroll-background {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%; /* Make SVG fill its parent container (chat-container) */
+                height: 100%; /* Make SVG fill its parent container (chat-container) */
+                z-index: 0; /* Positions the SVG behind the chat content */
+            }
+
+            /* This div precisely positions and clips the text content */
+            .chat-text-area {
+                position: absolute;
+                /* Calculate position and dimensions based on SVG's viewBox and paper area */
+                top: calc(
+                    44 / 800 * 100%
+                ); /* 44 units from top out of 800 total height (adjusted for scroll alignment) */
+                left: calc(
+                    100 / 600 * 100%
+                ); /* 100 units from left out of 600 total width */
+                width: calc(
+                    400 / 600 * 100%
+                ); /* 400 units wide out of 600 total width */
+                height: calc(
+                    712 / 800 * 100%
+                ); /* 712 units tall out of 800 total height (adjusted for scroll alignment) */
+
+                overflow-y: auto; /* Make this specific area scrollable */
+                overflow-x: hidden; /* Prevent horizontal scrolling */
+                box-sizing: border-box; /* Include any padding in the width/height */
+                z-index: 1; /* Ensure it's above the SVG */
+                /* Add responsive internal padding to space the text from the paper's edge */
+                padding: clamp(
+                    0.5em,
+                    2vw,
+                    1.5em
+                ); /* Responsive padding that scales with container */
+                scrollbar-width: thin; /* Make scrollbar thinner on Firefox */
+                scrollbar-color: #999 transparent; /* Custom scrollbar colors */
+            }
+
+            /* Webkit scrollbar styling for better integration */
+            .chat-text-area::-webkit-scrollbar {
+                width: 6px;
+            }
+            .chat-text-area::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.1);
+                border-radius: 3px;
+            }
+            .chat-text-area::-webkit-scrollbar-thumb {
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 3px;
+            }
+            .chat-text-area::-webkit-scrollbar-thumb:hover {
+                background: rgba(0, 0, 0, 0.5);
+            }
+
+            /* This div styles the text elements themselves and ensures no external margins */
+            .chat-content {
+                color: #333; /* Dark text for readability on light scroll paper */
+                text-shadow: 1px 1px 0 #fff; /* A subtle text shadow for pixel font clarity */
+                line-height: 1.4;
+                /* Make font size responsive, but guarantee a minimum readable size */
+                font-size: clamp(
+                    12px,
+                    max(1.8vw, 2vh),
+                    24px
+                ); /* Responsive font size that scales with container */
+                margin: 0; /* Important: remove any default outer margins on this wrapper */
+                word-break: break-word; /* Ensure long words don't overflow */
+                hyphens: auto; /* Enable hyphenation for better text wrapping */
+            }
+
+            /* Chat message styling */
+            .chatMessage {
+                margin-bottom: clamp(4px, 1vh, 8px);
+                line-height: 1.4;
+                word-wrap: break-word; /* Ensures long words wrap */
+                overflow-wrap: break-word; /* Additional word wrapping support */
+            }
+            .username {
+                font-weight: bold;
+                color: #6a0dad; /* A distinct purple for Twitch */
+                margin-right: clamp(3px, 0.5vw, 5px);
+            }
+            .username.youtube {
+                color: #d32f2f; /* Red color for YouTube usernames */
+            }
+            .systemMessage {
+                font-style: italic;
+                color: #555;
+                margin-bottom: clamp(3px, 0.5vh, 5px);
+            }
+            .systemMessage.green {
+                color: #2d7d32;
+            }
+            .systemMessage.blue {
+                color: #1976d2;
+            }
+            .systemMessage.red {
+                color: #d32f2f;
+            }
+
+            /* Basic pixel art colors for the scroll, using CSS variables for easy modification */
+            .scroll-svg {
+                --scroll-paper-light: #f0e6bd; /* Light parchment color for the main paper */
+                --scroll-paper-dark: #d2c498; /* Darker parchment/shadow for paper depth */
+                --scroll-edge: #b4a271; /* Darker base color for rolls and edges */
+                --scroll-outline: #7a694b; /* Dark brown outline for pixel effect */
+                --shadow-dark: #5c4d39; /* Deepest shadow/depth color */
+            }
+
+            /* Media queries for better mobile responsiveness */
+            @media (max-width: 768px) {
+                .chat-text-area {
+                    padding: clamp(0.3em, 1.5vw, 1em);
+                }
+
+                .chat-content {
+                    font-size: clamp(10px, max(2.2vw, 2.5vh), 20px);
+                    line-height: 1.3;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .chat-text-area {
+                    padding: clamp(0.2em, 1vw, 0.8em);
+                }
+
+                .chat-content {
+                    font-size: clamp(8px, max(2.4vw, 2.8vh), 18px);
+                    line-height: 1.2;
+                }
+
+                .chatMessage {
+                    margin-bottom: clamp(2px, 0.8vh, 6px);
+                }
+
+                .username {
+                    margin-right: clamp(2px, 0.3vw, 4px);
+                }
+            }
+
+            @media (orientation: landscape) and (max-height: 600px) {
+                .chat-content {
+                    font-size: clamp(10px, max(2vw, 2.5vh), 16px);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="chat-container">
+            <!-- The SVG element for the scroll background -->
+            <svg
+                class="scroll-background scroll-svg"
+                viewBox="0 0 600 800"
+                preserveAspectRatio="none"
+            >
+                <!--
+                Retro pixel art unfurled scroll.
+                Using a conceptual grid step of 4 units. All coordinates and dimensions are multiples of 4.
+                This creates the distinct, blocky "pixel" look typical of pixel art.
+            -->
+
+                <!-- Scroll Paper Main Area -->
+                <rect
+                    x="100"
+                    y="44"
+                    width="400"
+                    height="712"
+                    fill="var(--scroll-paper-light)"
+                />
+
+                <!-- Paper Edges (simulating slight curl/depth and pixelation) -->
+                <polygon
+                    points="96,44 100,44 100,756 96,756"
+                    fill="var(--scroll-paper-dark)"
+                />
+                <polygon
+                    points="92,44 96,44 96,756 92,756"
+                    fill="var(--scroll-edge)"
+                />
+                <polygon
+                    points="500,44 504,44 504,756 500,756"
+                    fill="var(--scroll-paper-dark)"
+                />
+                <polygon
+                    points="504,44 508,44 508,756 504,756"
+                    fill="var(--scroll-edge)"
+                />
+
+                <!-- Top Roll (constructed from multiple rectangles to simulate a rolled paper look) -->
+                <rect
+                    x="80"
+                    y="0"
+                    width="440"
+                    height="40"
+                    fill="var(--scroll-edge)"
+                />
+                <rect
+                    x="96"
+                    y="8"
+                    width="408"
+                    height="24"
+                    fill="var(--scroll-paper-dark)"
+                />
+                <rect
+                    x="100"
+                    y="4"
+                    width="400"
+                    height="8"
+                    fill="var(--scroll-paper-light)"
+                />
+                <rect
+                    x="92"
+                    y="36"
+                    width="416"
+                    height="8"
+                    fill="var(--shadow-dark)"
+                />
+                <rect
+                    x="76"
+                    y="-4"
+                    width="448"
+                    height="4"
+                    fill="var(--scroll-outline)"
+                />
+                <!-- Top edge -->
+                <rect
+                    x="76"
+                    y="-4"
+                    width="4"
+                    height="48"
+                    fill="var(--scroll-outline)"
+                />
+                <!-- Left edge -->
+                <rect
+                    x="520"
+                    y="-4"
+                    width="4"
+                    height="48"
+                    fill="var(--scroll-outline)"
+                />
+                <!-- Right edge -->
+                <rect
+                    x="76"
+                    y="40"
+                    width="24"
+                    height="4"
+                    fill="var(--scroll-outline)"
+                />
+                <!-- Bottom-left connection -->
+                <rect
+                    x="500"
+                    y="40"
+                    width="24"
+                    height="4"
+                    fill="var(--scroll-outline)"
+                />
+                <!-- Bottom-right connection -->
+                <rect
+                    x="96"
+                    y="0"
+                    width="4"
+                    height="8"
+                    fill="var(--scroll-outline)"
+                />
+                <rect
+                    x="500"
+                    y="0"
+                    width="4"
+                    height="8"
+                    fill="var(--scroll-outline)"
+                />
+                <rect
+                    x="96"
+                    y="32"
+                    width="4"
+                    height="8"
+                    fill="var(--scroll-outline)"
+                />
+                <rect
+                    x="500"
+                    y="32"
+                    width="4"
+                    height="8"
+                    fill="var(--scroll-outline)"
+                />
+
+                <!-- Bottom Roll (mirrored construction of the top roll) -->
+                <rect
+                    x="80"
+                    y="760"
+                    width="440"
+                    height="40"
+                    fill="var(--scroll-edge)"
+                />
+                <rect
+                    x="96"
+                    y="768"
+                    width="408"
+                    height="24"
+                    fill="var(--scroll-paper-dark)"
+                />
+                <rect
+                    x="100"
+                    y="788"
+                    width="400"
+                    height="8"
+                    fill="var(--scroll-paper-light)"
+                />
+                <rect
+                    x="92"
+                    y="756"
+                    width="416"
+                    height="8"
+                    fill="var(--shadow-dark)"
+                />
+                <rect
+                    x="76"
+                    y="800"
+                    width="448"
+                    height="4"
+                    fill="var(--scroll-outline)"
+                />
+                <!-- Bottom edge -->
+                <rect
+                    x="76"
+                    y="756"
+                    width="4"
+                    height="48"
+                    fill="var(--scroll-outline)"
+                />
+                <!-- Left edge -->
+                <rect
+                    x="520"
+                    y="756"
+                    width="4"
+                    height="48"
+                    fill="var(--scroll-outline)"
+                />
+                <!-- Right edge -->
+                <rect
+                    x="76"
+                    y="756"
+                    width="24"
+                    height="4"
+                    fill="var(--scroll-outline)"
+                />
+                <!-- Top-left connection -->
+                <rect
+                    x="500"
+                    y="756"
+                    width="24"
+                    height="4"
+                    fill="var(--scroll-outline)"
+                />
+                <!-- Top-right connection -->
+                <rect
+                    x="96"
+                    y="760"
+                    width="4"
+                    height="8"
+                    fill="var(--scroll-outline)"
+                />
+                <rect
+                    x="500"
+                    y="760"
+                    width="4"
+                    height="8"
+                    fill="var(--scroll-outline)"
+                />
+                <rect
+                    x="96"
+                    y="792"
+                    width="4"
+                    height="8"
+                    fill="var(--scroll-outline)"
+                />
+                <rect
+                    x="500"
+                    y="792"
+                    width="4"
+                    height="8"
+                    fill="var(--scroll-outline)"
+                />
+
+                <!-- Overall Outline for the main paper area -->
+                <rect
+                    x="96"
+                    y="40"
+                    width="408"
+                    height="4"
+                    fill="var(--scroll-outline)"
+                />
+                <!-- Top border -->
+                <rect
+                    x="96"
+                    y="756"
+                    width="408"
+                    height="4"
+                    fill="var(--scroll-outline)"
+                />
+                <!-- Bottom border -->
+                <rect
+                    x="96"
+                    y="44"
+                    width="4"
+                    height="712"
+                    fill="var(--scroll-outline)"
+                />
+                <!-- Left border -->
+                <rect
+                    x="500"
+                    y="44"
+                    width="4"
+                    height="712"
+                    fill="var(--scroll-outline)"
+                />
+                <!-- Right border -->
+
+                <!-- Optional: Small decorative elements / "pins" or weights on the scroll ends -->
+                <rect
+                    x="60"
+                    y="0"
+                    width="16"
+                    height="16"
+                    fill="var(--scroll-outline)"
+                />
+                <rect
+                    x="64"
+                    y="4"
+                    width="8"
+                    height="8"
+                    fill="var(--shadow-dark)"
+                />
+                <rect
+                    x="524"
+                    y="0"
+                    width="16"
+                    height="16"
+                    fill="var(--scroll-outline)"
+                />
+                <rect
+                    x="528"
+                    y="4"
+                    width="8"
+                    height="8"
+                    fill="var(--shadow-dark)"
+                />
+                <rect
+                    x="60"
+                    y="784"
+                    width="16"
+                    height="16"
+                    fill="var(--scroll-outline)"
+                />
+                <rect
+                    x="64"
+                    y="788"
+                    width="8"
+                    height="8"
+                    fill="var(--shadow-dark)"
+                />
+                <rect
+                    x="524"
+                    y="784"
+                    width="16"
+                    height="16"
+                    fill="var(--scroll-outline)"
+                />
+                <rect
+                    x="528"
+                    y="788"
+                    width="8"
+                    height="8"
+                    fill="var(--shadow-dark)"
+                />
+            </svg>
+
+            <!-- The actual chat log content will go here, precisely positioned -->
+            <div class="chat-text-area">
+                <div class="chat-content" id="chatLog">
+                    <!-- Chat messages will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+
+        <script>
+            type = "text/javascript";
+            src =
+                "https://unpkg.com/@streamerbot/client/dist/streamerbot-client.js";
+        </script>
+        <script>
+            const chatLog = document.getElementById("chatLog");
+
+            function addLogMessage(message, className = "systemMessage") {
+                const messageElement = document.createElement("div");
+                messageElement.classList.add(...className.split(" "));
+                messageElement.innerHTML = message;
+                chatLog.appendChild(messageElement);
+
+                // Smooth scroll to the bottom of the chat text area
+                const chatTextArea = document.querySelector(".chat-text-area");
+                requestAnimationFrame(() => {
+                    chatTextArea.scrollTo({
+                        top: chatTextArea.scrollHeight,
+                        behavior: "smooth",
+                    });
+                });
+            }
+
+            const client = new StreamerbotClient({
+                host: "127.0.0.1",
+                port: 8080,
+                endpoint: "/",
+                onConnect: () => {
+                    addLogMessage(
+                        "Connected to Streamer.bot WebSocket.",
+                        "systemMessage green",
+                    );
+                },
+                onDisconnect: () => {
+                    addLogMessage(
+                        "WebSocket disconnected. Attempting to reconnect...",
+                        "systemMessage red",
+                    );
+                },
+                onError: (error) => {
+                    console.error("WebSocket error:", error);
+                    addLogMessage(
+                        "WebSocket error occurred. Check browser console for details.",
+                        "systemMessage red",
+                    );
+                },
+            });
+
+            // client.on("Twitch.ChatMessage", (data) => {
+            //     console.log("Twitch ChatMessage data:", data); // Log the data
+            //     const messageData = data.data.message ?? {};
+            //     const userName =
+            //         messageData.displayName ?? messageData.name ?? "";
+            //     const chatMessage = data.data.parts
+            //         .filter((part) => part.type === "text")
+            //         .map((part) => part.text)
+            //         .join("");
+            //     console.log("data.data.text:", data.data.text);
+            //     console.log("data.data.parts:", data.data.parts);
+
+            //     const messageElement = document.createElement("div");
+            //     messageElement.classList.add("chatMessage");
+            //     messageElement.innerHTML = `<span class="username">[Twitch] ${userName}:</span> ${chatMessage}`;
+            //     chatLog.appendChild(messageElement);
+
+            //     // Smooth scroll to the bottom of the chat text area
+            //     const chatTextArea = document.querySelector(".chat-text-area");
+            //     requestAnimationFrame(() => {
+            //         chatTextArea.scrollTo({
+            //             top: chatTextArea.scrollHeight,
+            //             behavior: "smooth",
+            //         });
+            //     });
+            // });
+
+            client.on("YouTube.Message", (data) => {
+                console.log("YouTube Message data:", data); // Log the data
+                const userName = data.data.user.name;
+                // Filter out emojis and only get text parts
+                const chatMessage = data.data.parts
+                    .filter((part) => part.text && !part.emoji) // Only include parts with text but no emoji property
+                    .map((part) => part.text)
+                    .join("");
+
+                const messageElement = document.createElement("div");
+                messageElement.classList.add("chatMessage");
+                messageElement.innerHTML = `<span class="username youtube">[YouTube] ${userName}:</span> ${chatMessage}`;
+                chatLog.appendChild(messageElement);
+
+                // Smooth scroll to the bottom of the chat text area
+                const chatTextArea = document.querySelector(".chat-text-area");
+                requestAnimationFrame(() => {
+                    chatTextArea.scrollTo({
+                        top: chatTextArea.scrollHeight,
+                        behavior: "smooth",
+                    });
+                });
+            });
+
+            addLogMessage(
+                "Attempting to connect to Streamer.bot WebSocket...",
+                "systemMessage",
+            );
+
+            // Handle window resize to ensure proper alignment
+            let resizeTimeout;
+            window.addEventListener("resize", () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    const chatTextArea =
+                        document.querySelector(".chat-text-area");
+                    if (chatTextArea) {
+                        // Maintain scroll position relative to bottom after resize
+                        requestAnimationFrame(() => {
+                            chatTextArea.scrollTop = chatTextArea.scrollHeight;
+                        });
+                    }
+                }, 150);
+            });
+
+            // Handle orientation change for mobile devices
+            window.addEventListener("orientationchange", () => {
+                setTimeout(() => {
+                    const chatTextArea =
+                        document.querySelector(".chat-text-area");
+                    if (chatTextArea) {
+                        requestAnimationFrame(() => {
+                            chatTextArea.scrollTop = chatTextArea.scrollHeight;
+                        });
+                    }
+                }, 300);
+            });
+        </script>
+    </body>
+</html>
