@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Layouts | Backgrounds</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Catppuccin Macchiato Palette */
+            --rosewater: #f4dbd6;
+            --flamingo: #f0c6c6;
+            --pink: #f5bde6;
+            --mauve: #c6a0f6;
+            --red: #ed8796;
+            --maroon: #ee99a0;
+            --peach: #f5a97f;
+            --yellow: #eed49f;
+            --green: #a6da95;
+            --teal: #8bd5ca;
+            --sky: #91d7e3;
+            --sapphire: #7dc4e4;
+            --blue: #8aadf4;
+            --lavender: #b7bdf8;
+            --text: #cad3f5;
+            --subtext1: #b8c0e0;
+            --subtext0: #a5adcb;
+            --overlay2: #939ab7;
+            --overlay1: #8087a2;
+            --overlay0: #6e738d;
+            --surface2: #5b6078;
+            --surface1: #494d64;
+            --surface0: #363a4f;
+            --base: #24273a;
+            --mantle: #1e2030;
+            --crust: #181926;
+
+            /* Material Design 3 Intentions */
+            --md-sys-color-primary: var(--lavender);
+            --md-sys-color-on-primary: var(--base);
+            --md-sys-color-secondary: var(--teal);
+            --md-sys-color-on-secondary: var(--base);
+            --md-sys-color-surface: var(--surface0);
+            --md-sys-color-on-surface: var(--text);
+            --md-sys-color-on-surface-variant: var(--subtext1);
+            --md-sys-color-background: var(--base);
+            --md-sys-color-outline: var(--surface2);
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-surface);
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(183, 189, 248, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 213, 202, 0.05) 0px, transparent 50%);
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            padding: 4rem 2rem;
+        }
+
+        header {
+            margin-bottom: 4rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(135deg, var(--lavender), var(--sapphire));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.03em;
+        }
+
+        p.subtitle {
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 1.2rem;
+            margin-top: 0.5rem;
+            font-weight: 300;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 32px;
+            padding: 2rem;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--md-sys-color-outline);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(183, 189, 248, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            width: 64px;
+            height: 64px;
+            background-color: var(--surface1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--overlay2);
+        }
+
+        .card:hover .card-title {
+            color: var(--md-sys-color-primary);
+        }
+
+        .card-description {
+            color: var(--md-sys-color-on-surface-variant);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            flex-grow: 1;
+        }
+
+        .card-action {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            color: var(--md-sys-color-primary);
+            gap: 0.5rem;
+        }
+
+        .card-action svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2.5;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 2rem 1rem;
+            }
+            h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Stream Layouts</h1>
+            <p class="subtitle">Select a background for your stream</p>
+        </header>
+
+        <main class="grid">
+            <a href="bg/code_stream.html" class="card">
+                <div class="card-icon">💻</div>
+                <h2 class="card-title">Code Stream</h2>
+                <p class="card-description">A dynamic, hacker-style background with scrolling lines of code and syntax highlighting. Perfect for dev streams.</p>
+                <div class="card-action">
+                    Launch Preview
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                </div>
+            </a>
+
+            <a href="bg/galaxy.html" class="card">
+                <div class="card-icon">🌌</div>
+                <h2 class="card-title">Galaxy</h2>
+                <p class="card-description">Deep space exploration with moving stars, nebulae, and cosmic dust. Great for RPGs or chill-hop sessions.</p>
+                <div class="card-action">
+                    Launch Preview
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                </div>
+            </a>
+
+            <a href="bg/string_stream.html" class="card">
+                <div class="card-icon">🧶</div>
+                <h2 class="card-title">String Stream</h2>
+                <p class="card-description">Fluid, abstract lines that dance across the screen. A minimalist yet captivating ambient background.</p>
+                <div class="card-action">
+                    Launch Preview
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                </div>
+            </a>
+        </main>
+    </div>
+</body>
+</html>
